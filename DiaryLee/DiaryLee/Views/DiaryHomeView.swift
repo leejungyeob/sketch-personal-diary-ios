@@ -19,8 +19,8 @@ struct DiaryHomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        print("!@3")
+                    NavigationLink {
+                        DiaryView()
                     } label: {
                         Image(systemName: "plus")
                             .foregroundStyle(.black)
