@@ -11,7 +11,7 @@ import SwiftUI
 struct DiaryLeeApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DiaryHomeView()
         }
     }
 }
