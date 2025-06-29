@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  sketch-personal-diary-ios
+//  DiaryLee
 //
 //  Created by 이중엽 on 6/29/25.
 //
