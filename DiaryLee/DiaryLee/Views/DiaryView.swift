@@ -13,6 +13,7 @@ struct DiaryView: View {
     @State var inputContent: String = ""
     @State var date: Date = Date()
     @Environment(\.dismiss) var dismiss
+    @Binding var diaryList: [Diary]
     
     var body: some View {
         
@@ -72,7 +73,9 @@ struct DiaryView: View {
             
             ToolbarItem {
                 Button {
-                    print("\(inputText), \(date), \(inputContent)")
+                    let newDiary = Diary(title: inputText, date: date, content: inputContent)
+                    self.diaryList.append(newDiary)
+                    dismiss()
                 } label: {
                     Text("저장하기")
                         .font(.subheadline)
@@ -85,5 +88,5 @@ struct DiaryView: View {
 }
 
 #Preview {
-    DiaryView()
+    DiaryView(diaryList: .constant([]))
 }
