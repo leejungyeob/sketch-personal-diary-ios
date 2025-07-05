@@ -1,5 +1,5 @@
 //
-//  DiaryView.swift
+//  DiaryEditorView.swift
 //  DiaryLee
 //
 //  Created by 이중엽 on 6/29/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DiaryView: View {
+struct DiaryEditorView: View {
     
     @State var inputText: String = ""
     @State var inputContent: String = ""
@@ -88,5 +88,5 @@ struct DiaryView: View {
 }
 
 #Preview {
-    DiaryView(diaryList: .constant([]))
+    DiaryEditorView(diaryList: .constant([]))
 }

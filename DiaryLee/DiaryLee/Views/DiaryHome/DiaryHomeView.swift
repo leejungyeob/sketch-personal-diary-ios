@@ -16,7 +16,7 @@ struct DiaryHomeView: View {
             
             ScrollView {
                 ForEach($diaryList) { diary in
-                    DiaryListView(diary: diary)
+                    DiaryRowView(diary: diary)
                         .padding(.top, 10)
                 }
             }
@@ -26,7 +26,7 @@ struct DiaryHomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
-                        DiaryView(diaryList: $diaryList)
+                        DiaryEditorView(diaryList: $diaryList)
                     } label: {
                         Image(systemName: "plus")
                             .foregroundStyle(.black)
