@@ -9,9 +9,10 @@ import SwiftUI
 
 struct DiaryEditorView: View {
     
-    @State var inputText: String = ""
-    @State var inputContent: String = ""
-    @State var date: Date = Date()
+    @StateObject var container: EditorContainer<EditorIntent, EditorStateProtocol>
+    private var intent: EditorIntentProtocol { container.intent }
+    private var state: EditorStateProtocol { container.model }
+    
     @Environment(\.dismiss) var dismiss
     @Binding var diaryList: [Diary]
     
@@ -28,8 +29,10 @@ struct DiaryEditorView: View {
                     Text("제목")
                         .font(.callout)
                     
-                    TextField("", text: $inputText,
-                              prompt: Text("제목을 입력해주세요")
+                    TextField("", text: Binding(
+                        get: { state.title },
+                        set: { intent.send(.titleChanged($0)) }
+                    ), prompt: Text("제목을 입력해주세요")
                         .font(.callout)
                         .foregroundStyle(.black.opacity(0.5))
                     )
@@ -40,13 +43,17 @@ struct DiaryEditorView: View {
                 }
                 .padding(.horizontal, 10)
                 
-                DatePicker("날짜", selection: $date)
+                DatePicker("날짜", selection: Binding(
+                    get: { state.date },
+                    set: { intent.send(.dateChanged($0)) }))
                     .font(.callout)
                     .padding(.horizontal, 10)
                     .tint(.black)
                     .datePickerStyle(.compact)
                 
-                TextEditor(text: $inputContent)
+                TextEditor(text: Binding(
+                    get: { state.content },
+                    set: { value, transaction in intent.send(.contentChanged(value)) }))
                     .scrollContentBackground(.hidden)
                     .background(.gray.opacity(0.1))
                     .cornerRadius(10)
@@ -73,9 +80,7 @@ struct DiaryEditorView: View {
             
             ToolbarItem {
                 Button {
-                    let newDiary = Diary(title: inputText, date: date, content: inputContent)
-                    self.diaryList.append(newDiary)
-                    dismiss()
+                    intent.send(.saveButtonTapped)
                 } label: {
                     Text("저장하기")
                         .font(.subheadline)
@@ -87,6 +92,18 @@ struct DiaryEditorView: View {
     }
 }
 
+extension DiaryEditorView {
+    static func build() -> some View {
+        let model = EditorModel()
+        let intent = EditorIntent(model: model)
+        let container = EditorContainer(intent: intent,
+                                        model: model as EditorStateProtocol,
+                                        modelChangedPublisher: model.objectWillChange)
+        let view = DiaryEditorView(container: container, diaryList: .constant([]))
+        return view
+    }
+}
+
 #Preview {
-    DiaryEditorView(diaryList: .constant([]))
+    DiaryEditorView.build()
 }

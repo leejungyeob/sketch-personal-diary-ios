@@ -26,7 +26,7 @@ struct DiaryHomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
-                        DiaryEditorView(diaryList: $diaryList)
+                        DiaryEditorView.build()
                     } label: {
                         Image(systemName: "plus")
                             .foregroundStyle(.black)
