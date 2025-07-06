@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Diary: Identifiable, Equatable {
-    let id = UUID()
+struct Diary: Identifiable, Equatable, Codable {
+    var id = UUID()
     let title: String
     let date: Date
     let content: String

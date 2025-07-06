@@ -14,7 +14,6 @@ struct DiaryEditorView: View {
     private var state: EditorStateProtocol { container.model }
     
     @Environment(\.dismiss) var dismiss
-    @Binding var diaryList: [Diary]
     
     var body: some View {
         
@@ -53,7 +52,7 @@ struct DiaryEditorView: View {
                 
                 TextEditor(text: Binding(
                     get: { state.content },
-                    set: { value, transaction in intent.send(.contentChanged(value)) }))
+                    set: { intent.send(.contentChanged($0)) }))
                     .scrollContentBackground(.hidden)
                     .background(.gray.opacity(0.1))
                     .cornerRadius(10)
@@ -89,17 +88,22 @@ struct DiaryEditorView: View {
                 }
             }
         }
+        .onReceive(state.dismissPublisher) { _ in
+            dismiss()
+        }
     }
 }
 
 extension DiaryEditorView {
     static func build() -> some View {
-        let model = EditorModel()
+        let diaryRepository = DefaultDiaryRepository()
+        let saveDiaryUseCase = SaveDiaryUseCase(diaryRepository: diaryRepository)
+        let model = EditorModel(saveDiaryUseCase: saveDiaryUseCase)
         let intent = EditorIntent(model: model)
         let container = EditorContainer(intent: intent,
                                         model: model as EditorStateProtocol,
                                         modelChangedPublisher: model.objectWillChange)
-        let view = DiaryEditorView(container: container, diaryList: .constant([]))
+        let view = DiaryEditorView(container: container)
         return view
     }
 }

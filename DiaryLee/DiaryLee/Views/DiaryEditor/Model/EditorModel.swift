@@ -6,11 +6,19 @@
 //
 
 import Foundation
+import Combine
 
 final class EditorModel: ObservableObject, EditorStateProtocol, EditorActionProtocol {
     @Published var title: String = ""
     @Published var content: String = ""
     @Published var date: Date = Date()
+    let dismissPublisher = PassthroughSubject<Void, Never>()
+
+    private let saveDiaryUseCase: SaveDiaryUseCase
+
+    init(saveDiaryUseCase: SaveDiaryUseCase) {
+        self.saveDiaryUseCase = saveDiaryUseCase
+    }
     
     func updateTitle(_ title: String) {
         self.title = title
@@ -25,6 +33,14 @@ final class EditorModel: ObservableObject, EditorStateProtocol, EditorActionProt
     }
     
     func saveDiary() {
-        _ = Diary(title: title, date: date, content: content)
+        let newDiary = Diary(title: title, date: date, content: content)
+        Task { @MainActor in
+            do {
+                try await saveDiaryUseCase.execute(diary: newDiary)
+                dismissPublisher.send(())
+            } catch {
+                print("\(error.localizedDescription)")
+            }
+        }
     }
 }

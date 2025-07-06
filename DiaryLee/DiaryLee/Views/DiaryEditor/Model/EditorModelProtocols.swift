@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Combine
 
 protocol EditorStateProtocol {
     var title: String { get }
     var content: String { get }
     var date: Date { get }
+    var dismissPublisher: PassthroughSubject<Void, Never> { get }
 }
 
 protocol EditorActionProtocol: AnyObject {
