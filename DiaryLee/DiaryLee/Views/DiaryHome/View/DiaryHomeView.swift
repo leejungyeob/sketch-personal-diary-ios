@@ -9,9 +9,9 @@ import SwiftUI
 
 struct DiaryHomeView: View {
     
-    @StateObject var container: DiaryHomeContainer<DiaryHomeIntent, DiaryHomeStateProtocol>
+    @StateObject var container: DiaryHomeContainer<DiaryHomeIntent, DiaryHomeModel>
     private var intent: DiaryHomeIntentProtocol { container.intent }
-    private var state: DiaryHomeStateProtocol { container.model }
+    private var state: DiaryHomeState { container.model.state }
     
     var body: some View {
         NavigationView {
@@ -45,7 +45,6 @@ struct DiaryHomeView: View {
                             .foregroundStyle(.black)
                             .font(.caption)
                     }
-                    
                 }
             }
         }
@@ -55,15 +54,14 @@ struct DiaryHomeView: View {
     }
 }
 
+// MARK: - Build
 extension DiaryHomeView {
     static func build() -> some View {
         let diaryRepository = DefaultDiaryRepository()
         let fetchDiariesUseCase = FetchDiariesUseCase(diaryRepository: diaryRepository)
-        let model = DiaryHomeModel(fetchDiariesUseCase: fetchDiariesUseCase)
-        let intent = DiaryHomeIntent(model: model)
-        let container = DiaryHomeContainer(intent: intent,
-                                        model: model as DiaryHomeStateProtocol,
-                                        modelChangedPublisher: model.objectWillChange)
+        let model = DiaryHomeModel()
+        let intent = DiaryHomeIntent(model: model, fetchDiariesUseCase: fetchDiariesUseCase)
+        let container = DiaryHomeContainer(intent: intent, model: model)
         let view = DiaryHomeView(container: container)
         return view
     }

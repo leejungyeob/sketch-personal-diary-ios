@@ -101,8 +101,7 @@ extension DiaryEditorView {
         let model = EditorModel(saveDiaryUseCase: saveDiaryUseCase)
         let intent = EditorIntent(model: model)
         let container = EditorContainer(intent: intent,
-                                        model: model as EditorStateProtocol,
-                                        modelChangedPublisher: model.objectWillChange)
+                                        model: model as EditorStateProtocol)
         let view = DiaryEditorView(container: container)
         return view
     }

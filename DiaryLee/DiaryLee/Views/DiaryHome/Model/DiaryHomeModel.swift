@@ -6,40 +6,53 @@
 //
 
 import Foundation
-import Combine
 
-protocol DiaryHomeStateProtocol {
-    var diaryList: [Diary] { get }
-    var isLoading: Bool { get }
-    var errorMessage: String? { get }
+// MARK: - State
+struct DiaryHomeState {
+    var diaryList: [Diary] = []
+    var isLoading: Bool = false
+    var errorMessage: String? = nil
 }
 
+// MARK: - Action Protocol
 protocol DiaryHomeActionProtocol: AnyObject {
-    func fetchDiaries()
+    func send(_ intent: DiaryHomeIntentType)
 }
 
-final class DiaryHomeModel: ObservableObject, DiaryHomeStateProtocol, DiaryHomeActionProtocol {
-    @Published var diaryList: [Diary] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
+// MARK: - Model: ObservableObject, State Conformance
+final class DiaryHomeModel: ObservableObject {
+    @Published var state: DiaryHomeState
 
-    private let fetchDiariesUseCase: FetchDiariesUseCase
-
-    init(fetchDiariesUseCase: FetchDiariesUseCase) {
-        self.fetchDiariesUseCase = fetchDiariesUseCase
+    init(initialState: DiaryHomeState = .init()) {
+        self.state = initialState
     }
+}
 
-    func fetchDiaries() {
-        isLoading = true
-        errorMessage = nil
-        Task { @MainActor in
-            do {
-                let fetchedDiaries = try await fetchDiariesUseCase.execute()
-                self.diaryList = fetchedDiaries
-            } catch {
-                self.errorMessage = error.localizedDescription
-            }
-            self.isLoading = false
+// MARK: - SideEffect
+extension DiaryHomeModel {
+    enum SideEffect {
+        case fetchDiaries
+    }
+}
+
+// MARK: - Reducer
+extension DiaryHomeModel {
+    @MainActor
+    func reduce(_ intent: DiaryHomeIntentType) -> SideEffect? {
+        switch intent {
+        case .viewOnAppear, .refreshDiaries:
+            state.isLoading = true
+            state.errorMessage = nil
+            return .fetchDiaries
+        
+        case .diariesFetched(let diaries):
+            state.isLoading = false
+            state.diaryList = diaries
+            
+        case .fetchFailed(let error):
+            state.isLoading = false
+            state.errorMessage = error.localizedDescription
         }
+        return nil
     }
 }

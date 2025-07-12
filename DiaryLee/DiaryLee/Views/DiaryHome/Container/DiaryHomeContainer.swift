@@ -8,19 +8,21 @@
 import SwiftUI
 import Combine
 
-final class DiaryHomeContainer<Intent, Model>: ObservableObject {
+import Foundation
+import Combine
+
+final class DiaryHomeContainer<Intent: DiaryHomeIntentProtocol, Model: DiaryHomeModel>: ObservableObject {
     let intent: Intent
-    let model: Model
-
-    private var cancellable: Set<AnyCancellable> = []
-
-    init(intent: Intent, model: Model, modelChangedPublisher: ObjectWillChangePublisher) {
+    @Published var model: Model
+    
+    private var cancellable: AnyCancellable?
+    
+    init(intent: Intent, model: Model) {
         self.intent = intent
         self.model = model
-
-        modelChangedPublisher
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: objectWillChange.send)
-            .store(in: &cancellable)
+        
+        cancellable = model.objectWillChange.sink(receiveValue: { [weak self] _ in
+            self?.objectWillChange.send()
+        })
     }
 }
