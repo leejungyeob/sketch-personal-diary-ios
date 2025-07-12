@@ -37,13 +37,15 @@ extension DiaryHomeModel {
 
 // MARK: - Reducer
 extension DiaryHomeModel {
-    @MainActor
-    func reduce(_ intent: DiaryHomeIntentType) -> SideEffect? {
+    // reduce 함수는 이제 static이며, 순수하게 상태를 변경하고 SideEffect를 반환합니다.
+    // 이 함수 자체는 어떤 부수 효과도 직접 실행하지 않습니다.
+    static func reduce(state: inout DiaryHomeState, intent: DiaryHomeIntentType) -> SideEffect? {
+        var currentSideEffect: SideEffect? = nil
         switch intent {
         case .viewOnAppear, .refreshDiaries:
             state.isLoading = true
             state.errorMessage = nil
-            return .fetchDiaries
+            currentSideEffect = .fetchDiaries
         
         case .diariesFetched(let diaries):
             state.isLoading = false
@@ -53,6 +55,6 @@ extension DiaryHomeModel {
             state.isLoading = false
             state.errorMessage = error.localizedDescription
         }
-        return nil
+        return currentSideEffect
     }
 }

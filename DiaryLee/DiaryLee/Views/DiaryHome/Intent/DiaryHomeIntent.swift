@@ -20,7 +20,7 @@ protocol DiaryHomeIntentProtocol {
 }
 
 final class DiaryHomeIntent: DiaryHomeIntentProtocol {
-    private weak var model: DiaryHomeModel?
+    private var model: DiaryHomeModel
     private let fetchDiariesUseCase: FetchDiariesUseCase
     
     // 진행중인 fetch 작업을 관리하기 위한 Task
@@ -33,11 +33,11 @@ final class DiaryHomeIntent: DiaryHomeIntentProtocol {
 
     @MainActor
     func send(_ intent: DiaryHomeIntentType) {
-        // 먼저, 인텐트를 기반으로 상태를 변경(reduce)합니다.
-        // 리듀서는 동기적으로 동작하며, 선택적으로 사이드 이펙트를 반환합니다.
-        guard let sideEffect = model?.reduce(intent) else { return }
+        // 1. reduce 함수를 호출하여 상태를 변경하고, 발생해야 할 SideEffect를 받습니다.
+        // reduce는 이제 순수 함수이며, SideEffect를 직접 실행하지 않습니다.
+        let sideEffect = DiaryHomeModel.reduce(state: &model.state, intent: intent)
         
-        // 사이드 이펙트를 처리합니다.
+        // 2. reduce가 반환한 SideEffect를 실제로 실행합니다.
         switch sideEffect {
         case .fetchDiaries:
             // 경쟁 상태(race condition)를 피하기 위해 이전의 fetch 작업을 취소합니다.
@@ -56,6 +56,8 @@ final class DiaryHomeIntent: DiaryHomeIntentProtocol {
                     send(.fetchFailed(error))
                 }
             }
+        case .none:
+            break // 처리할 SideEffect가 없음
         }
     }
 }
